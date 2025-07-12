@@ -79,3 +79,16 @@ Type mathFuncs::vecReduce(const std::vector<Type>& vec)
 
     return d_result[0];
 }
+
+template<typename Type, int nRows, int nColumns>
+void mathFuncs::fillMatrix(float* mat)
+{
+    std::cout << "Generating matrix [" << nRows << "x" << nColumns << "]";
+
+    for (int i = 0; i < nRows * nColumns; i++)
+    {
+        mat[i] = static_cast<float>(rand()) / RAND_MAX;
+        std::cout << " " << mat[i];
+    }
+    std::cout << std::endl;
+}

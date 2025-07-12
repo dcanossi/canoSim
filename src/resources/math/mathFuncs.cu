@@ -10,23 +10,47 @@
 │                                            Copyright (c) 2025 Dário Canossi  │
 └─────────────────────────────────────────────────────────────────────────────*/
 
-#ifndef clock_H
-#define clock_H
+#include "mathFuncs.h"
 
-#include <string>
-
-class clock
+__global__ void mathFuncs::matMul_d
+(
+    float* A,
+    float* B,
+    float* C,
+    int m,
+    int k,
+    int n
+)
 {
-    // Names of the months
-    static const char *monthNames[];
+    int row = blockIdx.y * blockDim.y + threadIdx.y;
+    int col = blockIdx.x * blockDim.x + threadIdx.z;
 
-public:
+    if (row < m && col < n)
+    {
+        float sum = 0.0;
+        for (int l = 0; l < k; l++)
+        {
+            sum += A[row * k + l] * B[l * n + col];
+        }
 
-    //- Return the current date as a string
-    static std::string date();
+        C[row * n + col] = sum;
+    }
+}
 
-    //- Return the current clock time as a string
-    static std::string clockTime();
-};
+void mathFuncs::matMul_h(float* A, float* B, float* C, int m, int k, int n)
+{
+    for (int i = 0; i < m; i++)
+    {
+        for (int j = 0; j < n; j++)
+        {
+            float sum = 0.0;
 
-#endif
+            for (int l = 0; l < k; l++)
+            {
+                sum += A[i*k + l] * B[l*n + j];
+            }
+
+            C[i*n + j] = sum;
+        }
+    }
+}

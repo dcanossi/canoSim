@@ -13,6 +13,7 @@
 #ifndef mathFuncs_H
 #define mathFuncs_H
 
+#include <array>
 #include <vector>
 #include <cuda/std/span>
 
@@ -27,9 +28,19 @@ __global__ void reduce
     cuda::std::span<int> result
 );
 
+// Naive matrix multiplication on device
+__global__ void matMul_d(float* A, float* B, float* C, int m, int k, int n);
+
 // Main function for vector reduction
 template<typename Type>
 Type vecReduce(const std::vector<Type>& vec);
+
+// Fill a N x N matrix
+template<typename Type, int nRows, int nColumns>
+void fillMatrix(float* mat);
+
+// Matrix multiplication on host
+void matMul_h(float* A, float* B, float* C, int m, int k, int n);
 
 }
 
