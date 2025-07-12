@@ -42,6 +42,12 @@ target_include_directories(canoSim PUBLIC
     "src/resources/mesh"
 )
 
+add_executable(canoSim++ "solvers/canoSimxx.cu")
+target_include_directories(canoSim++ PUBLIC
+    "src/basic"
+    "src/resources/mesh"
+)
+
 add_executable(matrixMultiply "solvers/matrixMultiply.cu")
 target_include_directories(matrixMultiply PUBLIC
     "src/resources/math"
