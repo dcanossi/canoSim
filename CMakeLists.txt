@@ -33,14 +33,15 @@ add_library(basic STATIC "src/basic/clock.cpp")
 
 add_library(resources STATIC
     "src/resources/math/mathFuncs.cu"
-    "src/resources/mesh/mesh.cpp"
+    "src/resources/mesh/cartMesh.cpp"
 )
 
-add_executable(canoSim "solvers/canoSim.cpp")
-target_include_directories(canoSim PUBLIC
-    "src/basic"
-    "src/resources/mesh"
-)
+# Temporarily disable build of the CPU-based solver
+#add_executable(canoSim "solvers/canoSim.cpp")
+#target_include_directories(canoSim PUBLIC
+#    "src/basic"
+#    "src/resources/mesh"
+#)
 
 add_executable(canoSim++ "solvers/canoSimxx.cu")
 target_include_directories(canoSim++ PUBLIC
@@ -53,11 +54,12 @@ target_include_directories(matrixMultiply PUBLIC
     "src/resources/math"
 )
 
-target_link_libraries(canoSim basic resources)
+# target_link_libraries(canoSim basic resources)
+target_link_libraries(canoSim++ basic resources)
 target_link_libraries(matrixMultiply resources)
 
 # CMake build properties
-set_source_files_properties("solvers/canoSim.cpp" PROPERTIES LANGUAGE CUDA)
+# set_source_files_properties("solvers/canoSim.cpp" PROPERTIES LANGUAGE CUDA)
 
 set_target_properties(basic PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
 set_target_properties(resources PROPERTIES CUDA_SEPARABLE_COMPILATION ON)

@@ -10,34 +10,37 @@
 │                                            Copyright (c) 2025 Dário Canossi  │
 └─────────────────────────────────────────────────────────────────────────────*/
 
+#ifndef cartMesh_H
+#define cartMesh_H
+
 #include <iostream>
 
-class mesh
+class cartMesh
 {
-    int blockX, blockY, blockZ;
+    static std::string meshFile_;
+
+    float scale_;
+
+    int blockX_, blockY_, blockZ_;
+
+    float lengthX_, lengthY_, lengthZ_;
+
+    // Helper function for mesh reading
+    void createMesh();
 
 public:
 
-    mesh(int nx, int ny, int nz)
-    :
-        blockX(nx),
-        blockY(ny),
-        blockZ(nz)
-    {
-        checkMesh();
-    }
+    // Construction from mesh file
+    cartMesh();
 
     // Run a mesh check
-    bool checkMesh() const
-    {
-        return true;
-    }
+    bool checkMesh() const;
 
     // Print mesh stats
-    void printMeshStats() const
-    {
-        std::cout << "Number of blocks: Nx = " << blockX
-            << " | Ny = " << blockY
-            << " | Nz = " << blockZ << std::endl;
-    }
+    void printMeshStats() const;
+
+    // Write mesh
+    bool write() const;
 };
+
+#endif

@@ -15,7 +15,7 @@
 #include <cuda_runtime.h>
 
 #include "clock.h"
-#include "mesh.cpp"
+#include "cartMesh.h"
 
 void printHeader()
 {
@@ -51,8 +51,10 @@ void printRunInfo()
         << "\n| Device : " << "[" << devID << "] " << props.name << " ("
             << props.major << "." << props.minor << ")"
         << "\n| Date   : " << clock::date().c_str()
-        << "\n| Time   : " << clock::clockTime().c_str()
-        << "\n\n" << std::endl;
+        << "\n| Time   : " << clock::clockTime().c_str() << "\n"
+        << "########################################"
+        << "########################################"
+        << "\n" << std::endl;
 }
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -*/
@@ -65,14 +67,8 @@ int main()
     std::cout << "Starting simulation\n" << std::endl;
 
     std::cout << "Creating mesh for simulation..." << std::endl;
-
-    constexpr const int meshX = 3;
-    constexpr const int meshY = 2;
-    constexpr const int meshZ = 1;
-
-    const mesh flowMesh(meshX, meshY, meshZ);
-
-    flowMesh.printMeshStats();
+    const cartMesh mesh;
+    mesh.printMeshStats();
 
     std::cout << "\nEnd." << std::endl;
 
