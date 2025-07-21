@@ -1,0 +1,26 @@
+#──────────────────────────────────────────────────────────────────────────────#
+#       ╔═══╗   ╔═══╗   ╔═══╗   ╔═══╗   ╔═══╗   ╔═══╗   ╔═══╗   ╔══════╗       #
+#       ║ c ║   ║ a ║   ║ n ║   ║ o ║   ║ S ║   ║ i ║   ║ m ║   ║ +  + ║       #
+#       ╚═══╝   ╚═══╝   ╚═══╝   ╚═══╝   ╚═══╝   ╚═══╝   ╚═══╝   ╚══════╝       #
+#                                                                              #
+#                       ~ Computational Fluid Dynamics ~                       #
+#                       High-Performance GPU Flow Solver                       #
+#                                                                              #
+#                                                                              #
+#                                            Copyright (c) 2025 Dário Canossi  #
+#──────────────────────────────────────────────────────────────────────────────#
+
+# meshInput file
+
+origin (0, 0, 0);
+scale 0.01;
+
+# Number of elements in each cartesian coordinate direction
+nx 4;
+ny 3;
+nz 2;
+
+# Elements length (constant)
+lx 1;
+ly 1;
+lz 1;
