@@ -33,7 +33,12 @@ add_library(basic STATIC "src/basic/clock.cpp")
 
 add_library(resources STATIC
     "src/resources/math/mathFuncs.cu"
+    "src/resources/math/vec/vec.cpp"
     "src/resources/mesh/cartMesh.cpp"
+)
+target_include_directories(resources PUBLIC
+    "src/resources/math/vec"
+    "src/resources/mesh/cell"
 )
 
 # Temporarily disable build of the CPU-based solver

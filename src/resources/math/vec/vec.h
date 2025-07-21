@@ -10,68 +10,43 @@
 │                                            Copyright (c) 2025 Dário Canossi  │
 └─────────────────────────────────────────────────────────────────────────────*/
 
-#ifndef cartMesh_H
-#define cartMesh_H
+#ifndef vec_H
+#define vec_H
 
 #include <iostream>
-#include <vector>
 
-#include "cell.h"
-
-class cartMesh
+class vec
 {
-    static std::string meshFile_;
-
-    vec origin_;
-
-    float scale_;
-
-    int blockX_, blockY_, blockZ_;
-
-    float lengthX_, lengthY_, lengthZ_;
-
-    // nPoints in each cell (8 for a cartesian mesh)
-    static constexpr int nCellPoints_ = 8;
-
-    // Mesh points and cells
-    std::vector<vec> points_;
-    std::vector<cell> cells_;
-
-    // Helper function for reading the origin from the mesh input
-    void readOrigin()
-    {
-        // Not yet supported. Origin = (0, 0, 0) by default.
-    }
-
-    // Helper function for mesh reading
-    void readMeshInput();
-
-    // Generate cell-point addressing
-    void generateCellAddr
-    (
-        int i,
-        int j,
-        int k,
-        int pIdx,
-        std::vector<std::set<int>>& addr
-    ) const;
-
-    // Helper function for creating mesh
-    bool createMesh();
+    float vecX_, vecY_, vecZ_;
 
 public:
 
-    // Construction from mesh file
-    cartMesh();
+    // Default construction
+    vec() = default;
 
-    // Run a mesh check
-    bool checkMesh() const;
+    // Construction from components
+    vec(const float& x, const float& y, const float& z);
 
-    // Print mesh stats
-    void printMeshStats() const;
+    // Get x-component
+    const float& x()
+    {
+        return vecX_;
+    }
 
-    // Write mesh
-    bool write() const;
+    // Get y-component
+    const float& y()
+    {
+        return vecY_;
+    }
+
+    // Get x-component
+    const float& z()
+    {
+        return vecZ_;
+    }
+
+    // Stream operator
+    friend std::ostream& operator<<(std::ostream& os, const vec& vector);
 };
 
 #endif
