@@ -35,10 +35,12 @@ add_library(resources STATIC
     "src/resources/math/mathFuncs.cu"
     "src/resources/math/vec/vec.cpp"
     "src/resources/mesh/cartMesh.cpp"
+    "src/resources/mesh/vtk/vtkWriter.cpp"
 )
 target_include_directories(resources PUBLIC
     "src/resources/math/vec"
     "src/resources/mesh/cell"
+    "src/resources/mesh/vtk"
 )
 
 # Temporarily disable build of the CPU-based solver
