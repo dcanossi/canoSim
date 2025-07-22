@@ -45,8 +45,47 @@ public:
         return vecZ_;
     }
 
+    // i-element access operator
+    inline const float& operator[](int direction) const;
+
+    // i-element non-const access operator
+    inline float& operator[](int direction);
+
     // Stream operator
     friend std::ostream& operator<<(std::ostream& os, const vec& vector);
 };
+
+// Inline functions definition
+inline const float& vec::operator[](int direction) const
+{
+    switch (direction)
+    {
+        case 0:
+            return vecX_;
+        case 1:
+            return vecY_;
+        case 2:
+            return vecZ_;
+        default:
+            std::cerr << "Error: Index out of range for vec" << std::endl;
+            std::abort();
+    }
+}
+
+inline float& vec::operator[](int direction)
+{
+    switch (direction)
+    {
+        case 0:
+            return vecX_;
+        case 1:
+            return vecY_;
+        case 2:
+            return vecZ_;
+        default:
+            std::cerr << "Error: Index out of range for vec" << std::endl;
+            std::abort();
+    }
+}
 
 #endif

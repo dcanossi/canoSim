@@ -10,32 +10,54 @@
 │                                            Copyright (c) 2025 Dário Canossi  │
 └─────────────────────────────────────────────────────────────────────────────*/
 
-#ifndef cell_H
-#define cell_H
+#ifndef face_H
+#define face_H
 
-#include <array>
-#include <set>
+#include <iostream>
+#include <vector>
 
-#include "face.h"
-#include "vec.h"
-
-class cell
+struct face : std::vector<int>
 {
-    std::set<int> pointAddressing_;
+    enum class direction {X, Y, Z};
 
-    std::vector<face> faceAddressing_;
-
-    const std::vector<vec>& points_;
+    bool boundary_;
 
 public:
 
-    // Construction from point and face addressing and global point coordinates
-    cell
-    (
-        const std::set<int>& pointAddr,
-        const std::array<std::vector<int>, 6>& faceAddr,
-        const std::vector<vec>& points
-    );
+    // Null construction
+    face() = default;
+
+    // Construction from list of vertices
+    face(const std::vector<int>& vertices)
+    :
+        std::vector<int>(vertices),
+        boundary_(true)
+    {}
+
+    // Is this face a boundary face?
+    bool isBoundary() const
+    {
+        return boundary_;
+    }
+
+    // Return the isBoundary status for this face so it can be changed
+    bool& isBoundary()
+    {
+        return boundary_;
+    }
+
+    // Stream operator
+    friend std::ostream& operator<<(std::ostream& os, const face& face)
+    {
+        os << "( ";
+        for (auto pointi : face)
+        {
+            os << pointi << " ";
+        }
+        os << ")";
+
+        return os;
+    }
 };
 
 #endif

@@ -10,32 +10,32 @@
 │                                            Copyright (c) 2025 Dário Canossi  │
 └─────────────────────────────────────────────────────────────────────────────*/
 
-#ifndef cell_H
-#define cell_H
+#ifndef gFunctions_H
+#define gFunctions_H
 
-#include <array>
-#include <set>
+#include <bits/stdc++.h>
 
-#include "face.h"
-#include "vec.h"
+// --- Global functions definition --- //
 
-class cell
+// Global debug flag
+// #define DEBUG 1;
+
+#ifdef DEBUG
+#define DEBUG_COUT(str) do { std::cout << str << std::endl; } while (false)
+#else
+#define DEBUG_COUT(str) do { } while (false)
+#endif
+
+// Overload stream operator << for std::vector
+template <typename T>
+std::ostream& operator<<(std::ostream& os, const std::vector<T>& vector)
 {
-    std::set<int> pointAddressing_;
+    for (auto i : vector)
+    {
+        os << i << " ";
+    }
 
-    std::vector<face> faceAddressing_;
-
-    const std::vector<vec>& points_;
-
-public:
-
-    // Construction from point and face addressing and global point coordinates
-    cell
-    (
-        const std::set<int>& pointAddr,
-        const std::array<std::vector<int>, 6>& faceAddr,
-        const std::vector<vec>& points
-    );
-};
+    return os;
+}
 
 #endif

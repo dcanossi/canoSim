@@ -12,19 +12,15 @@
 
 #include <algorithm>
 #include <cfloat>
+#include <filesystem>
 #include <fstream>
+#include <memory>
 #include <set>
 #include <unordered_map>
 
+#include "gFunctions.h"
 #include "cartMesh.h"
-
-// #define DEBUG;
-
-#ifdef DEBUG
-#define DEBUG_COUT(str) do { std::cout << str << std::endl; } while (false)
-#else
-#define DEBUG_COUT(str) do { } while (false)
-#endif
+#include "vtkWriter.h"
 
 std::string cartMesh::meshFile_ = "meshInput.txt";
 
@@ -106,7 +102,7 @@ void cartMesh::readMeshInput()
     lengthZ_ = keyFound["lz"];
 }
 
-void cartMesh::generateCellAddr
+void cartMesh::calcCellAddr
 (
     int i,
     int j,
@@ -217,14 +213,168 @@ void cartMesh::generateCellAddr
     }
 }
 
+std::vector<face> cartMesh::generateFaces
+(
+    const std::vector<std::set<int>>& vertices,
+    std::vector<std::array<std::vector<int>, 6>>& cellsFaces
+)
+{
+    std::vector<face> globalFaces;
+
+    for (size_t i = 0; i < vertices.size(); i++)
+    {
+        const auto& celli = vertices[i];
+
+        const int minPointIdx = *celli.begin();
+        const int maxPointIdx = *celli.rbegin();
+
+        auto& cellFaces = cellsFaces[i];
+
+        // For each cell, calculate the point addressing of each face.
+        for (const auto& verti : celli)
+        {
+            // Insert points in faces perpendicular to x
+            if (abs(points_[verti].x() - points_[minPointIdx].x()) < FLT_MIN)
+            {
+                cellFaces[0].push_back(verti);
+            }
+            else if
+            (
+                abs(points_[verti].x() - points_[maxPointIdx].x()) < FLT_MIN
+            )
+            {
+                cellFaces[1].push_back(verti);
+            }
+
+            // Insert points in faces perpendicular to y
+            if (abs(points_[verti].y() - points_[minPointIdx].y()) < FLT_MIN)
+            {
+                cellFaces[2].push_back(verti);
+            }
+            else if
+            (
+                abs(points_[verti].y() - points_[maxPointIdx].y()) < FLT_MIN
+            )
+            {
+                cellFaces[3].push_back(verti);
+            }
+
+            // Insert points in faces perpendicular to z
+            if (abs(points_[verti].z() - points_[minPointIdx].z()) < FLT_MIN)
+            {
+                cellFaces[4].push_back(verti);
+            }
+            else if
+            (
+                abs(points_[verti].z() - points_[maxPointIdx].z()) < FLT_MIN
+            )
+            {
+                cellFaces[5].push_back(verti);
+            }
+        }
+
+        const auto& prevCellFaces =
+            i > 0
+          ? cellsFaces[i - 1]
+          : std::array<std::vector<int>, 6>{};
+
+        for (size_t j = 0; j < cellFaces.size(); j++)
+        {
+            auto& cellFacej = cellFaces[j];
+
+            // First, check if face has the correct number of points.
+            if (cellFacej.size() != nFacePoints_)
+            {
+                std::cerr << "\nError: Invalid number of points in face " << j
+                    << ": " << faces_[j].size() << std::endl;
+
+                std::abort();
+            }
+
+            // Swap order of last two face vertices, so it forms a topologically
+            // closed domain.
+            std::swap
+            (
+                cellFacej[cellFacej.size() - 2],
+                cellFacej[cellFacej.size() - 1]
+            );
+
+            // Then, check if this face is already included in the global faces.
+            // If so, then mark it as an internal face and do not add it again.
+            std::vector<int> prevCellNextFacej;
+            if (!prevCellFaces[0].empty() && j < cellFaces.size() - 1)
+            {
+                prevCellNextFacej = prevCellFaces[j + 1];
+            }
+
+            if (cellFacej == prevCellNextFacej)
+            {
+                #ifdef DEBUG
+                {
+                    std::cout << "\nNot including duplicated face " << j
+                        << " from cell " << i << std::endl;
+                }
+                #endif
+
+                for (int k = globalFaces.size() - 1; k >= 0; --k)
+                {
+                    if (globalFaces[k] == cellFacej)
+                    {
+                        globalFaces[k].isBoundary() = false;
+                    }
+                }
+
+                continue;
+            }
+
+            // Finally, add the new face to the global face list.
+            globalFaces.emplace_back(face(cellFacej));
+        }
+    }
+
+    #ifdef DEBUG
+    {
+        std::cout << "\nFace-point addressing:\n" << std::endl;
+        int cnt = 0;
+        for (const auto& facei : globalFaces)
+        {
+            std::cout << "Face: " << cnt++ << ": " << facei;
+
+            if (facei.isBoundary())
+            {
+                std::cout << " | Boundary" << std::endl;
+            }
+            else
+            {
+                std::cout << " | Internal" << std::endl;
+            }
+        }
+    }
+    #endif
+
+    // Sanity check for the number of vertices in each face
+    for (size_t i = 0; i < globalFaces.size(); i++)
+    {
+        if (globalFaces[i].size() != nFacePoints_)
+        {
+            std::cerr << "\nError: Invalid number of points in face " << i
+                << ": " << faces_[i].size() << std::endl;
+
+            std::abort();
+        }
+    }
+
+    return globalFaces;
+}
+
 bool cartMesh::createMesh()
 {
+    // Generate point list
+    points_.reserve((blockX_ + 1) * blockY_ * (blockZ_ + 1));
+
     // Generate cell list
     const int nCells = blockX_ * blockY_ * blockZ_;
     cells_.reserve(nCells);
-
-    // Generate point list
-    points_.reserve((blockX_ + 1) * blockY_ * (blockZ_ + 1));
 
     std::vector<std::set<int>> cellsVertices;
     cellsVertices.resize(nCells);
@@ -239,7 +389,7 @@ bool cartMesh::createMesh()
                 points_.emplace_back(vec(i*lengthX_, j*lengthY_, k*lengthZ_));
 
                 // Generate cell-point addressing
-                generateCellAddr(i, j, k, pIdx, cellsVertices);
+                calcCellAddr(i, j, k, pIdx, cellsVertices);
 
                 pIdx++;
             }
@@ -278,10 +428,16 @@ bool cartMesh::createMesh()
         }
     }
 
-    // Generate cells with point addressing
+    // Generate global faces from cells
+    std::vector<std::array<std::vector<int>, 6>> cellsFaces;
+    cellsFaces.resize(cellsVertices.size());
+
+    faces_ = generateFaces(cellsVertices, cellsFaces);
+
+    // Generate cells with point and face addressing
     for (int i = 0; i < nCells; i++)
     {
-        cells_.emplace_back(cellsVertices[i], points_);
+        cells_.emplace_back(cellsVertices[i], cellsFaces[i], points_);
     }
 
     return true;
@@ -305,6 +461,9 @@ cartMesh::cartMesh()
 
     // Generate mesh data (points, cells, connectivity)
     createMesh();
+
+    // Print mesh statistics
+    printMeshStats();
 
     // Write mesh to disk
     write();
@@ -361,7 +520,12 @@ bool cartMesh::write() const
 {
     std::cout << "\nWriting mesh to disk." << std::endl;
 
-    // To do: Write mesh in vtk format
+    std::filesystem::create_directory("mesh");
+
+    std::unique_ptr<vtkWriter> vtkW =
+        std::make_unique<vtkWriter>(points_, faces_, "mesh/cartMesh.vtk");
+
+    vtkW->write();
 
     return true;
 }

@@ -35,11 +35,14 @@ add_library(resources STATIC
     "src/resources/math/mathFuncs.cu"
     "src/resources/math/vec/vec.cpp"
     "src/resources/mesh/cartMesh.cpp"
+    "src/resources/mesh/cell/cell.cpp"
     "src/resources/mesh/vtk/vtkWriter.cpp"
 )
 target_include_directories(resources PUBLIC
+    "src/basic"
     "src/resources/math/vec"
     "src/resources/mesh/cell"
+    "src/resources/mesh/face"
     "src/resources/mesh/vtk"
 )
 

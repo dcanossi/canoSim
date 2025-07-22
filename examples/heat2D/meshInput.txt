@@ -13,14 +13,14 @@
 # meshInput file
 
 origin (0, 0, 0);
-scale 0.01;
+scale 1.0;
 
 # Number of elements in each cartesian coordinate direction
-nx 4;
-ny 3;
-nz 2;
+nx 1;
+ny 1;
+nz 1;
 
 # Elements length (constant)
-lx 1;
-ly 1;
-lz 1;
+lx 1.0;
+ly 1.0;
+lz 1.0;

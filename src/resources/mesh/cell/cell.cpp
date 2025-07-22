@@ -10,32 +10,21 @@
 │                                            Copyright (c) 2025 Dário Canossi  │
 └─────────────────────────────────────────────────────────────────────────────*/
 
-#ifndef cell_H
-#define cell_H
+#include "cell.h"
 
-#include <array>
-#include <set>
-
-#include "face.h"
-#include "vec.h"
-
-class cell
+cell::cell
+(
+    const std::set<int>& pointAddr,
+    const std::array<std::vector<int>, 6>& faceAddr,
+    const std::vector<vec>& points
+)
+:
+    pointAddressing_(pointAddr),
+    faceAddressing_(faceAddr.size()),
+    points_(points)
 {
-    std::set<int> pointAddressing_;
-
-    std::vector<face> faceAddressing_;
-
-    const std::vector<vec>& points_;
-
-public:
-
-    // Construction from point and face addressing and global point coordinates
-    cell
-    (
-        const std::set<int>& pointAddr,
-        const std::array<std::vector<int>, 6>& faceAddr,
-        const std::vector<vec>& points
-    );
-};
-
-#endif
+    for (size_t i = 0; i < faceAddr.size(); i++)
+    {
+        faceAddressing_[i] = faceAddr[i];
+    }
+}

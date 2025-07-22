@@ -14,6 +14,7 @@
 #include <unistd.h>
 #include <cuda_runtime.h>
 
+#include "gFunctions.h"
 #include "clock.h"
 #include "cartMesh.h"
 
@@ -68,7 +69,6 @@ int main()
 
     std::cout << "Creating mesh for simulation..." << std::endl;
     const cartMesh mesh;
-    mesh.printMeshStats();
 
     std::cout << "\nEnd." << std::endl;
 

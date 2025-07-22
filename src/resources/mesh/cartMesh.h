@@ -13,6 +13,7 @@
 #ifndef cartMesh_H
 #define cartMesh_H
 
+#include <array>
 #include <iostream>
 #include <vector>
 
@@ -30,12 +31,16 @@ class cartMesh
 
     float lengthX_, lengthY_, lengthZ_;
 
-    // nPoints in each cell (8 for a cartesian mesh)
+    // nPoints in each cell (8 for a Cartesian mesh)
     static constexpr int nCellPoints_ = 8;
+
+    // nPoints in each face (4 for a Cartesian mesh)
+    static constexpr int nFacePoints_ = 4;
 
     // Mesh points and cells
     std::vector<vec> points_;
     std::vector<cell> cells_;
+    std::vector<face> faces_;
 
     // Helper function for reading the origin from the mesh input
     void readOrigin()
@@ -47,7 +52,7 @@ class cartMesh
     void readMeshInput();
 
     // Generate cell-point addressing
-    void generateCellAddr
+    void calcCellAddr
     (
         int i,
         int j,
@@ -55,6 +60,13 @@ class cartMesh
         int pIdx,
         std::vector<std::set<int>>& addr
     ) const;
+
+    // Create global faces with face-point addressing
+    std::vector<face> generateFaces
+    (
+        const std::vector<std::set<int>>& vertices,
+        std::vector<std::array<std::vector<int>, 6>>& cellsFaces
+    );
 
     // Helper function for creating mesh
     bool createMesh();
