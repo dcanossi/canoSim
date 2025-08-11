@@ -50,6 +50,29 @@ EulerSolver::~EulerSolver()
     cudaFree(d_residual_);
 }
 
+void EulerSolver::solve()
+{
+    constexpr int nSteps = 100;
+    std::cout << std::endl;
+
+    // Initialise with uniform flow
+    initialiseUniform(1.225f, 50.0f, 10.0f, 0.0f, 101325.0f);
+
+    // Run for the prescribed iterations
+    for (int iter = 0; iter < nSteps; ++iter)
+    {
+        timeStep();
+
+        if (iter % 10 == 0)
+        {
+            std::cout << "Iteration " << iter << " | dt = "
+                << getTimeStep() << std::endl;
+        }
+    }
+
+    writeSolution("solution_final.vtk", nSteps);
+}
+
 void EulerSolver::initialiseUniform
 (
     float rho,
@@ -210,5 +233,5 @@ void EulerSolver::writeSolution(const std::string& filename, int iteration)
 
     file.close();
 
-    std::cout << "Fields solution written to " << filename << std::endl;
+    std::cout << "\nFields solution written to " << filename << std::endl;
 }

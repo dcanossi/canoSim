@@ -27,7 +27,8 @@ std::string cartMesh::meshFile_ = "meshInput.txt";
 void cartMesh::readMeshInput()
 {
     std::string inputFile = "./" + meshFile_;
-    std::cout << "Reading mesh from input file: " << inputFile << std::endl;
+    std::cout << "Reading mesh parameters from input file: "
+        << inputFile << std::endl;
 
     readOrigin();
 

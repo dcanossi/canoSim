@@ -17,6 +17,7 @@
 #include "gFunctions.h"
 #include "clock.h"
 #include "cartMesh.h"
+#include "EulerSolver.h"
 
 void printHeader()
 {
@@ -109,11 +110,12 @@ int main(int argc, char** argv)
 
         // Read mesh
         // cartMesh mesh = cartMesh::readMesh();
+        cartMesh mesh;
 
         // Solve Euler equation for inviscid fluid flow
-        // EulerSolver(std::move(mesh)).solve();
+        EulerSolver(std::move(mesh)).solve();
 
-        std::cout << "End." << std::endl;
+        std::cout << "\nEnd." << std::endl;
     }
 
     return 0;

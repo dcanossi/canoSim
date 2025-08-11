@@ -137,6 +137,9 @@ public:
     // Destructor
     ~EulerSolver();
 
+    // Main solve function
+    void solve();
+
     // Initialise flow field with uniform conditions (for testing purposes)
     void initialiseUniform(float rho, float u, float v, float w, float p);
 
