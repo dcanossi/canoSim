@@ -14,6 +14,7 @@
 #define EulerSolver_H
 
 #include <memory>
+
 #include "cartMesh.h"
 
 // Struct for conservative variables (stored per cell)
@@ -107,6 +108,9 @@ struct faceFlux
 
 class EulerSolver
 {
+    // Name of the solution control file
+    static std::string controlFile_;
+
     // Pointer to underlying mesh object
     std::unique_ptr<cartMesh> mesh_;
 
@@ -119,8 +123,11 @@ class EulerSolver
     size_t totalCells_;
 
     // Time step control
+    float startTime_;
+    int nIter_;
+    float CFL_;
     float dt_;
-    float cfl_;
+    float totalTime_;
 
     // Device memory for solution and residuals
     conservativeVars* d_U_;
@@ -136,6 +143,9 @@ public:
 
     // Destructor
     ~EulerSolver();
+
+    // Read simulation control parameters from input file
+    void readControls();
 
     // Main solve function
     void solve();
@@ -156,7 +166,7 @@ public:
     void updateSolution();
 
     // Perform operations within a single time step
-    void timeStep();
+    void runTimeStep();
 
     // Get solution back to host
     void getSolution(conservativeVars* hostData);

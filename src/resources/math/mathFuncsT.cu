@@ -10,10 +10,11 @@
 │                                            Copyright (c) 2025 Dário Canossi  │
 └─────────────────────────────────────────────────────────────────────────────*/
 
-#include "mathFuncs.h"
 #include <cub/block/block_reduce.cuh>
 #include <cuda/atomic>
 #include <thrust/device_vector.h>
+
+#include "mathFuncs.h"
 
 template<int blockSize>
 __global__ void mathFuncs::reduce

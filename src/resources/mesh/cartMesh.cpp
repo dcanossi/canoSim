@@ -88,7 +88,8 @@ void cartMesh::readMeshInput()
     // Sanity check for missing inputs
     if (keyFound.size() != inputSize)
     {
-        std::cerr << "Invalid mesh input." << std::endl;
+        std::cerr << "Error: Invalid mesh input!" << std::endl;
+        std::exit(1);
     }
 
     // Construct mesh data from stream

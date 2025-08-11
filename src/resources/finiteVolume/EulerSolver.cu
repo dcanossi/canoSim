@@ -11,9 +11,13 @@
 └─────────────────────────────────────────────────────────────────────────────*/
 
 #include <algorithm>
+#include <filesystem>
 #include <fstream>
+
 #include "EulerSolver.h"
 #include "solverKernels.h"
+
+std::string EulerSolver::controlFile_ = "controls.txt";
 
 EulerSolver::EulerSolver(cartMesh&& mesh)
 :
@@ -25,12 +29,18 @@ EulerSolver::EulerSolver(cartMesh&& mesh)
     dy_(mesh_->getLengthY()),
     dz_(mesh_->getLengthZ()),
     totalCells_(nx_ * ny_ * nz_),
+    startTime_(-1),
+    nIter_(-1),
+    CFL_(-1),
     dt_(0.0f),
-    cfl_(0.5f),
+    totalTime_(0.0f),
     d_U_(nullptr),
     d_residual_(nullptr),
     h_U_(nullptr)
 {
+    // Read simulation controls
+    readControls();
+
     // Allocate host memory
     h_U_ = new conservativeVars[totalCells_];
 
@@ -50,27 +60,94 @@ EulerSolver::~EulerSolver()
     cudaFree(d_residual_);
 }
 
+void EulerSolver::readControls()
+{
+    std::string inputFile = "./" + controlFile_;
+    std::cout << "\nReading control parameters from input file: "
+        << inputFile << std::endl;
+
+    // Lambda for removing specific delimiters from input
+    auto isDelim = [](const char& chari)
+    {
+        switch (chari)
+        {
+            case ' ':
+                return true;
+            case ';':
+                return true;
+            default:
+                return false;
+        }
+    };
+
+    // List of all input keywords from the control file
+    std::set<std::string> inputKeys
+        {
+            "startTime",
+            "nIter",
+            "CFL"
+        };
+
+    std::unordered_map<std::string, float> keyFound;
+
+    std::ifstream file(controlFile_);
+    std::string str;
+    while (std::getline(file, str))
+    {
+        for (const auto& key : inputKeys)
+        {
+            if (keyFound.find(key) != keyFound.end()) continue;
+
+            if (str.find(key) != std::string::npos)
+            {
+                std::string value(str.substr(str.find(key) + key.length()));
+
+                // Remove delimiters from input
+                value.erase
+                (
+                    std::remove_if(value.begin(), value.end(), isDelim),
+                    value.end()
+                );
+
+                keyFound.insert({key, std::atof(value.c_str())});
+            }
+        }
+    }
+
+    // Sanity check for missing inputs
+    if (keyFound.size() != inputKeys.size())
+    {
+        std::cerr << "Error: Invalid simulation control input!" << std::endl;
+        std::exit(1);
+    }
+
+    // Construct control data from stream
+    startTime_ = keyFound["startTime"];
+    nIter_ = keyFound["nIter"];
+    CFL_ = keyFound["CFL"];
+}
+
 void EulerSolver::solve()
 {
-    constexpr int nSteps = 100;
+    totalTime_ += startTime_;
     std::cout << std::endl;
 
     // Initialise with uniform flow
     initialiseUniform(1.225f, 50.0f, 10.0f, 0.0f, 101325.0f);
 
     // Run for the prescribed iterations
-    for (int iter = 0; iter < nSteps; ++iter)
+    for (int iter = 1; iter <= nIter_; ++iter)
     {
-        timeStep();
+        runTimeStep();
 
         if (iter % 10 == 0)
         {
             std::cout << "Iteration " << iter << " | dt = "
-                << getTimeStep() << std::endl;
+                << getTimeStep() << "s | Time = " << totalTime_ << std::endl;
         }
     }
 
-    writeSolution("solution_final.vtk", nSteps);
+    writeSolution("finalSolution.vtk", nIter_);
 }
 
 void EulerSolver::initialiseUniform
@@ -128,11 +205,14 @@ float EulerSolver::computeTimeStep()
     // In practice, you'd compute this quantity from the solution.
     float maxWaveSpeed = 100.0f;  // m/s
 
-    float dtx = cfl_ * dx_ / maxWaveSpeed;
-    float dty = cfl_ * dy_ / maxWaveSpeed;
-    float dtz = cfl_ * dz_ / maxWaveSpeed;
+    float dtx = CFL_ * dx_ / maxWaveSpeed;
+    float dty = CFL_ * dy_ / maxWaveSpeed;
+    float dtz = CFL_ * dz_ / maxWaveSpeed;
 
     dt_ = std::min({dtx, dty, dtz});
+
+    // Update total simulation time
+    totalTime_ += dt_;
 
     return dt_;
 }
@@ -164,7 +244,7 @@ void EulerSolver::updateSolution()
     cudaDeviceSynchronize();
 }
 
-void EulerSolver::timeStep()
+void EulerSolver::runTimeStep()
 {
     computeTimeStep();
     computeResiduals();
@@ -205,8 +285,9 @@ void EulerSolver::writeSolution(const std::string& filename, int iteration)
         p[i] = prim.p;
     }
 
-    // Write fields to a VTK file
-    std::ofstream file(filename);
+    // Write solution fields to a VTK output file
+    std::filesystem::create_directory("solution");
+    std::ofstream file("solution/" + filename);
 
     file << "# vtk DataFile Version 3.0\n";
     file << "Euler Solution at iteration " << iteration << "\n";

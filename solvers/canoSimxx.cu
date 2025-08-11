@@ -100,7 +100,7 @@ int main(int argc, char** argv)
     }
     else if (runFlag == "init")
     {
-        std::cout << "Initializing fields\n" << std::endl;
+        std::cout << "Initialising fields\n" << std::endl;
 
         std::cout << "End." << std::endl;
     }
