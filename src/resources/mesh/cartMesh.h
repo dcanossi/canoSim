@@ -76,6 +76,9 @@ public:
     // Construction from mesh file
     cartMesh();
 
+    // Static function to read mesh
+    // static cartMesh readMesh();
+
     // Run a mesh check
     bool checkMesh() const;
 
@@ -84,6 +87,38 @@ public:
 
     // Write mesh
     bool write() const;
+
+    // Getters for mesh dimensions
+    int getBlockX() const
+    {
+        return blockX_;
+    }
+
+    int getBlockY() const
+    {
+        return blockY_;
+    }
+
+    int getBlockZ() const
+    {
+        return blockZ_;
+    }
+
+    // Getters for cell dimensions
+    float getLengthX() const
+    {
+        return lengthX_;
+    }
+
+    float getLengthY() const
+    {
+        return lengthY_;
+    }
+
+    float getLengthZ() const
+    {
+        return lengthZ_;
+    }
 };
 
 #endif

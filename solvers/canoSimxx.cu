@@ -41,6 +41,15 @@ void printRunInfo()
     char hostBuf[32];
     gethostname(hostBuf, sizeof(hostBuf));
 
+    // Check CUDA availability and abort if no device is found
+    int deviceCount;
+    cudaGetDeviceCount(&deviceCount);
+    if (deviceCount == 0)
+    {
+        std::cerr << "No CUDA devices found! Terminating run." << std::endl;
+        std::exit(1);
+    }
+
     // Device ID and properties
     int devID;
     cudaDeviceProp props;
@@ -51,6 +60,7 @@ void printRunInfo()
         << "\n| Host   : " << hostBuf
         << "\n| Device : " << "[" << devID << "] " << props.name << " (CC: "
             << props.major << "." << props.minor << ")"
+        << "\n| Memory : " << props.totalGlobalMem/(1024*1024) << " Mb"
         << "\n| Date   : " << clock::date().c_str()
         << "\n| Time   : " << clock::clockTime().c_str() << "\n"
         << "########################################"
@@ -96,6 +106,12 @@ int main(int argc, char** argv)
     else if (runFlag == "solve")
     {
         std::cout << "Starting simulation\n" << std::endl;
+
+        // Read mesh
+        // cartMesh mesh = cartMesh::readMesh();
+
+        // Solve Euler equation for inviscid fluid flow
+        // EulerSolver(std::move(mesh)).solve();
 
         std::cout << "End." << std::endl;
     }

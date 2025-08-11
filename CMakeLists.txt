@@ -33,15 +33,20 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 add_library(basic STATIC "src/basic/clock.cpp")
 
 add_library(resources STATIC
+    "src/resources/finiteVolume/EulerSolver.cu"
+    "src/resources/finiteVolume/solverKernels.cu"
     "src/resources/math/mathFuncs.cu"
     "src/resources/math/vec/vec.cpp"
     "src/resources/mesh/cartMesh.cpp"
     "src/resources/mesh/cell/cell.cpp"
     "src/resources/mesh/vtk/vtkWriter.cpp"
 )
+
 target_include_directories(resources PUBLIC
     "src/basic"
+    "src/resources/finiteVolume"
     "src/resources/math/vec"
+    "src/resources/mesh"
     "src/resources/mesh/cell"
     "src/resources/mesh/face"
     "src/resources/mesh/vtk"
