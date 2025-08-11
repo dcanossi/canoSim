@@ -37,3 +37,5 @@ canoSim++ -solve
 ```
 
 An example case is available in `examples/heat2D` illustrating the necessary input files.
+
+<img width="836" height="371" alt="Image" src="https://github.com/user-attachments/assets/14b3d3c9-7a8f-4deb-9bfd-d7902999e850" />
